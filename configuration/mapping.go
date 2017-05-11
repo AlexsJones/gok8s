@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"time"
 
 	"github.com/olekukonko/tablewriter"
 )
@@ -30,13 +29,14 @@ func (i *item) Executed(b bool) {
 
 //MapConfiguration ...
 type MapConfiguration struct {
-	maps []*item
+	maps     []*item
+	tableMap []string
 }
 
 //NewMapConfiguration ...
 func NewMapConfiguration() *MapConfiguration {
 	m := MapConfiguration{}
-
+	m.tableMap = []string{"Step", "Resource locator", "Validated", "Executed"}
 	return &m
 }
 
@@ -61,7 +61,7 @@ func (m *MapConfiguration) Pull() string {
 func (m *MapConfiguration) List() {
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Step", "Resource locator", "Validated", "Executed"})
+	table.SetHeader(m.tableMap)
 
 	var data [][]string
 
@@ -95,6 +95,8 @@ func (m *MapConfiguration) Retry(i int) {
 		fmt.Println("Index out of bounds")
 		return
 	}
+
+	m.run(m.maps[i])
 }
 
 //Run ...
@@ -107,8 +109,6 @@ func (m *MapConfiguration) Run() {
 		if current.uri != "" {
 
 			m.run(current)
-
-			time.Sleep(time.Second)
 			current.Executed(true)
 			c := exec.Command("clear")
 			c.Stdout = os.Stdout
