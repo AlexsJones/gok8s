@@ -2,16 +2,18 @@ package configuration
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
 
+	"github.com/AlexsJones/gok8s/util"
 	"github.com/olekukonko/tablewriter"
 )
 
 type item struct {
 	uri       string
-	validated bool
+	validated string
 	executed  string //✓ ✗
 	success   string //✓ ✗
 }
@@ -36,6 +38,16 @@ func (i *item) Success(b bool) {
 		i.success = "✗"
 	}
 }
+func (i *item) Validated(b bool) {
+
+	switch b {
+	case true:
+		i.validated = "✓"
+	case false:
+
+		i.validated = "✗"
+	}
+}
 
 //MapConfiguration ...
 type MapConfiguration struct {
@@ -57,7 +69,14 @@ func (m *MapConfiguration) Clear() {
 
 //Push ...
 func (m *MapConfiguration) Push(uri string) {
-	i := item{uri: uri, validated: false}
+	i := item{uri: uri}
+	retb, _ := util.Exists(uri)
+	_, err := url.ParseRequestURI(uri)
+	if (err == nil) || (retb == true) {
+		i.Validated(false)
+	} else {
+		i.Validated(true)
+	}
 	i.Executed(false)
 	i.success = "?"
 	m.maps = append(m.maps, &i)
