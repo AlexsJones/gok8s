@@ -11,44 +11,6 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-type item struct {
-	uri       string
-	validated string
-	executed  string //✓ ✗
-	success   string //✓ ✗
-}
-
-func (i *item) Executed(b bool) {
-
-	switch b {
-	case true:
-		i.executed = "✓"
-	case false:
-
-		i.executed = "✗"
-	}
-}
-func (i *item) Success(b bool) {
-
-	switch b {
-	case true:
-		i.success = "✓"
-	case false:
-
-		i.success = "✗"
-	}
-}
-func (i *item) Validated(b bool) {
-
-	switch b {
-	case true:
-		i.validated = "✓"
-	case false:
-
-		i.validated = "✗"
-	}
-}
-
 //MapConfiguration ...
 type MapConfiguration struct {
 	maps     []*item
@@ -80,11 +42,6 @@ func (m *MapConfiguration) Push(uri string) {
 	i.Executed(false)
 	i.success = "?"
 	m.maps = append(m.maps, &i)
-}
-
-//Pull ...
-func (m *MapConfiguration) Pull() string {
-	return ""
 }
 
 //List ...
