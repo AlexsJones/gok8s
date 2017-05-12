@@ -10,6 +10,7 @@ type item struct {
 	validated string
 	executed  string //✓ ✗
 	success   string //✓ ✗
+	log       string
 }
 
 func (i *item) Executed(b bool) {
