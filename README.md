@@ -23,6 +23,11 @@ s::::::::::::::s h:::::h     h:::::h e::::::::eeeeeeee   d:::::::::::::::::d
 
   Hooya.
 
+# Install 
+```
+go get github.com/AlexsJones/shed
+```
+
   ```
   clear      clear the current stack
   exit       exit the program
