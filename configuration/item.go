@@ -19,7 +19,6 @@ func (i *item) isExecuted(b bool) {
 	case true:
 		i.Executed = positive
 	case false:
-
 		i.Executed = negative
 	}
 }
