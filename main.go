@@ -108,5 +108,21 @@ func main() {
 			mapConfiguration.Run()
 		},
 	})
+	shell.AddCmd(&ishell.Cmd{
+		Name: "save",
+		Help: "Saves out a new ShedFile",
+		Func: func(c *ishell.Context) {
+
+			mapConfiguration.Save()
+		},
+	})
+	shell.AddCmd(&ishell.Cmd{
+		Name: "load",
+		Help: "Loads a local ShedFile into a schedule",
+		Func: func(c *ishell.Context) {
+
+			mapConfiguration.Load()
+		},
+	})
 	shell.Start()
 }

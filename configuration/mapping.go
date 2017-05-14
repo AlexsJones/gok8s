@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -34,16 +35,16 @@ func (m *MapConfiguration) Clear() {
 
 //Push ...
 func (m *MapConfiguration) Push(uri string) {
-	i := item{uri: uri}
+	i := item{Uri: uri}
 	retb, _ := util.Exists(uri)
 	_, err := url.ParseRequestURI(uri)
 	if (err == nil) || (retb == true) {
-		i.Validated(false)
+		i.isValidated(false)
 	} else {
-		i.Validated(true)
+		i.isValidated(true)
 	}
-	i.Executed(false)
-	i.success = "?"
+	i.isExecuted(false)
+	i.Success = "?"
 	m.maps = append(m.maps, &i)
 }
 
@@ -57,9 +58,9 @@ func (m *MapConfiguration) List() {
 
 	var inc = 1
 	for _, current := range m.maps {
-		if current.uri != "" {
-			data = append(data, []string{strconv.Itoa(inc), current.uri,
-				fmt.Sprint(current.validated), fmt.Sprintf(current.executed), current.success})
+		if current.Uri != "" {
+			data = append(data, []string{strconv.Itoa(inc), current.Uri,
+				fmt.Sprint(current.Validated), fmt.Sprintf(current.Executed), current.Success})
 			inc++
 		}
 	}
@@ -75,7 +76,7 @@ func (m *MapConfiguration) List() {
 }
 
 func (m *MapConfiguration) run(i *item) {
-	c := exec.Command(i.uri)
+	c := exec.Command(i.Uri)
 	file, err := ioutil.TempFile(os.TempDir(), "go-")
 
 	if err != nil {
@@ -84,13 +85,13 @@ func (m *MapConfiguration) run(i *item) {
 	defer file.Close()
 	c.Stdout = file
 	c.Stderr = file
-	i.log = file.Name()
+	i.Log = file.Name()
 	err = c.Run()
 	if err != nil {
-		i.Success(false)
+		i.isSuccess(false)
 		return
 	}
-	i.Success(true)
+	i.isSuccess(true)
 }
 
 //Logs ...
@@ -102,8 +103,8 @@ func (m *MapConfiguration) Logs(i int) {
 	}
 
 	current := m.maps[i]
-	if current.log != "" {
-		file, err := os.Open(current.log)
+	if current.Log != "" {
+		file, err := os.Open(current.Log)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -139,14 +140,14 @@ func (m *MapConfiguration) Run() {
 	var inc = 1
 
 	for _, current := range m.maps {
-		if current.uri != "" {
+		if current.Uri != "" {
 			m.run(current)
-			current.Executed(true)
+			current.isExecuted(true)
 			c := exec.Command("clear")
 			c.Stdout = os.Stdout
 			c.Run()
-			data = append(data, []string{strconv.Itoa(inc), current.uri,
-				fmt.Sprint(current.validated), fmt.Sprintf(current.executed), current.success})
+			data = append(data, []string{strconv.Itoa(inc), current.Uri,
+				fmt.Sprint(current.Validated), fmt.Sprintf(current.Executed), current.Success})
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader(m.tableMap)
 			for _, v := range data {
@@ -156,4 +157,63 @@ func (m *MapConfiguration) Run() {
 			inc++
 		}
 	}
+}
+
+//Save ...
+func (m *MapConfiguration) Save() {
+
+	if _, err := os.Stat("Shedfile"); os.IsExist(err) {
+		os.Remove("Shedfile")
+	}
+
+	f, err := os.Create("Shedfile")
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+
+	var b []byte
+	for _, i := range m.maps {
+		b, err = json.Marshal(i)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		jsonStr := string(b)
+		if _, err = f.WriteString(jsonStr + "\n"); err != nil {
+			panic(err)
+		}
+	}
+
+	fmt.Println("Created new Shedfile...")
+}
+
+//Load ...
+func (m *MapConfiguration) Load() {
+
+	file, err := os.Open("Shedfile")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var count int
+	for scanner.Scan() {
+		line := scanner.Text()
+		i := &item{}
+		err = json.Unmarshal([]byte(line), &i)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		m.maps = append(m.maps, i)
+		count++
+	}
+
+	if err = scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Loaded Shedfile with " + strconv.Itoa(count) + " steps")
 }
