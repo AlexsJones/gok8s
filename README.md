@@ -1,5 +1,3 @@
-# shed
-
 ```
                 hhhhhhh                                             d::::::d
                 h:::::h                                             d::::::d
