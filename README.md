@@ -1,5 +1,3 @@
-# shed
-
 ```
                 hhhhhhh                                             d::::::d
                 h:::::h                                             d::::::d
@@ -24,6 +22,11 @@ s::::::::::::::s h:::::h     h:::::h e::::::::eeeeeeee   d:::::::::::::::::d
   Automate repetitive tasks and save them as a `Shedfile`
 
   Hooya.
+
+# Install 
+```
+go get github.com/AlexsJones/shed
+```
 
   ```
   clear      clear the current stack
