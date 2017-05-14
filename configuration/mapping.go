@@ -6,12 +6,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
 
-	"github.com/AlexsJones/shed/util"
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -24,7 +22,7 @@ type MapConfiguration struct {
 //NewMapConfiguration ...
 func NewMapConfiguration() *MapConfiguration {
 	m := MapConfiguration{}
-	m.tableMap = []string{"Step", "Resource locator", "Validated", "Executed", "Successful"}
+	m.tableMap = []string{"Step", "Resource locator", "Executed", "Successful"}
 	return &m
 }
 
@@ -36,13 +34,6 @@ func (m *MapConfiguration) Clear() {
 //Push ...
 func (m *MapConfiguration) Push(uri string) {
 	i := item{Uri: uri}
-	retb, _ := util.Exists(uri)
-	_, err := url.ParseRequestURI(uri)
-	if (err == nil) || (retb == true) {
-		i.isValidated(false)
-	} else {
-		i.isValidated(true)
-	}
 	i.isExecuted(false)
 	i.Success = "?"
 	m.maps = append(m.maps, &i)
@@ -60,7 +51,7 @@ func (m *MapConfiguration) List() {
 	for _, current := range m.maps {
 		if current.Uri != "" {
 			data = append(data, []string{strconv.Itoa(inc), current.Uri,
-				fmt.Sprint(current.Validated), fmt.Sprintf(current.Executed), current.Success})
+				fmt.Sprintf(current.Executed), current.Success})
 			inc++
 		}
 	}
@@ -147,7 +138,7 @@ func (m *MapConfiguration) Run() {
 			c.Stdout = os.Stdout
 			c.Run()
 			data = append(data, []string{strconv.Itoa(inc), current.Uri,
-				fmt.Sprint(current.Validated), fmt.Sprintf(current.Executed), current.Success})
+				fmt.Sprintf(current.Executed), current.Success})
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader(m.tableMap)
 			for _, v := range data {

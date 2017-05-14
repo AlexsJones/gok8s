@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/AlexsJones/shed/configuration"
 	"github.com/abiosoft/ishell"
@@ -46,8 +47,7 @@ func main() {
 				fmt.Println("Requires PATH or URL")
 				return
 			}
-			c.Println("Pushing -> " + c.Args[0])
-			mapConfiguration.Push(c.Args[0])
+			mapConfiguration.Push(strings.Join(c.Args, " "))
 		},
 	})
 	shell.AddCmd(&ishell.Cmd{

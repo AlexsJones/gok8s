@@ -6,11 +6,10 @@ const (
 )
 
 type item struct {
-	Uri       string `json:"uri"`
-	Validated string `json:"validated"`
-	Executed  string `json:"executed"` //✓ ✗
-	Success   string `json:"success"`  //✓ ✗
-	Log       string `json:"log"`
+	Uri      string `json:"uri"`
+	Executed string `json:"executed"` //✓ ✗
+	Success  string `json:"success"`  //✓ ✗
+	Log      string `json:"log"`
 }
 
 func (i *item) isExecuted(b bool) {
@@ -30,15 +29,5 @@ func (i *item) isSuccess(b bool) {
 	case false:
 
 		i.Success = negative
-	}
-}
-func (i *item) isValidated(b bool) {
-
-	switch b {
-	case true:
-		i.Validated = positive
-	case false:
-
-		i.Validated = negative
 	}
 }
