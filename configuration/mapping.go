@@ -70,11 +70,12 @@ func (m *MapConfiguration) List() {
 func (m *MapConfiguration) run(i *item) {
 
 	s := strings.Split(i.Uri, " ")
+	args := strings.Split(i.Uri[len(s[0]):], " ")
 	if len(s) < 1 {
 		fmt.Println("Nothing to run!")
 		return
 	}
-	c := exec.Command(s[0], i.Uri[len(s[0]):])
+	c := exec.Command(s[0], args...)
 	file, err := ioutil.TempFile(os.TempDir(), "go-")
 
 	if err != nil {
