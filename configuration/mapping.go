@@ -202,6 +202,7 @@ func (m *MapConfiguration) Load() {
 	file, err := os.Open("Shedfile")
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	defer file.Close()
 
