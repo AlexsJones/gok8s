@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/olekukonko/tablewriter"
 )
@@ -67,7 +68,13 @@ func (m *MapConfiguration) List() {
 }
 
 func (m *MapConfiguration) run(i *item) {
-	c := exec.Command(i.Uri)
+
+	s := strings.Split(i.Uri, " ")
+	if len(s) < 1 {
+		fmt.Println("Nothing to run!")
+		return
+	}
+	c := exec.Command(s[0], i.Uri[len(s[0]):])
 	file, err := ioutil.TempFile(os.TempDir(), "go-")
 
 	if err != nil {
@@ -77,9 +84,16 @@ func (m *MapConfiguration) run(i *item) {
 	c.Stdout = file
 	c.Stderr = file
 	i.Log = file.Name()
-	err = c.Run()
+	err = c.Start()
 	if err != nil {
 		i.isSuccess(false)
+		fmt.Println(err.Error())
+		return
+	}
+	c.Wait()
+	if err != nil {
+		i.isSuccess(false)
+		fmt.Println(err.Error())
 		return
 	}
 	i.isSuccess(true)
