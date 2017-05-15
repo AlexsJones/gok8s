@@ -75,6 +75,7 @@ func (m *MapConfiguration) run(i *item) {
 		fmt.Println("Nothing to run!")
 		return
 	}
+	log.Printf("Executing: %s %s", s[0], args)
 	c := exec.Command(s[0], args...)
 	file, err := ioutil.TempFile(os.TempDir(), "go-")
 
