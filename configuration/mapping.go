@@ -110,6 +110,7 @@ func (m *MapConfiguration) Logs(i int) {
 	}
 
 	current := m.maps[i]
+
 	if current.Log != "" {
 		file, err := os.Open(current.Log)
 		if err != nil {
