@@ -15,6 +15,9 @@ _______________/\\\________________________________/\\\__
 
   Automate repetitive tasks and save them as a `Shedfile`
 
+  Offers `Shedfile` encryption so you can give a sensitive set of steps for someone to run
+  who you might not necessarily want to see all the steps
+
   Hooya.
 
 # Install
