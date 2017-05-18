@@ -2,6 +2,7 @@ package util
 
 import "os"
 
+//Exists ...
 func Exists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {

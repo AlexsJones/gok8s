@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 
+	"github.com/AlexsJones/shed/crypto"
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -25,6 +27,14 @@ func NewMapConfiguration() *MapConfiguration {
 	m := MapConfiguration{}
 	m.tableMap = []string{"Step", "Resource locator", "Executed", "Successful"}
 	return &m
+}
+
+//Count number of items in list
+func (m *MapConfiguration) Count() int {
+	if m.maps == nil {
+		return 0
+	}
+	return len(m.maps)
 }
 
 //Clear ...
@@ -167,10 +177,31 @@ func (m *MapConfiguration) Run() {
 	}
 }
 
-//Save ...
-func (m *MapConfiguration) Save() {
+//SaveOptions ...
+type SaveOptions struct {
+	Encrypted  bool
+	Passphrase []byte
+}
 
-	if _, err := os.Stat("Shedfile"); os.IsExist(err) {
+//Save ...
+func (m *MapConfiguration) Save(options *SaveOptions) {
+
+	b, err := json.Marshal(m.maps)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(b))
+
+	var saveText string
+	if options.Encrypted {
+		var o [32]byte
+		copy(options.Passphrase[:32], o[:])
+		saveText = string(crypto.EncryptText([]byte(b), o))
+	} else {
+		saveText = string(b)
+	}
+
+	if _, err = os.Stat("Shedfile"); os.IsExist(err) {
 		os.Remove("Shedfile")
 	}
 
@@ -181,17 +212,9 @@ func (m *MapConfiguration) Save() {
 
 	defer f.Close()
 
-	var b []byte
-	for _, i := range m.maps {
-		b, err = json.Marshal(i)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		jsonStr := string(b)
-		if _, err = f.WriteString(jsonStr + "\n"); err != nil {
-			panic(err)
-		}
+	fmt.Printf("Save size %d: %s", len(saveText), saveText)
+	if _, err = f.WriteString(saveText); err != nil {
+		panic(err)
 	}
 
 	fmt.Println("Created new Shedfile...")
@@ -200,29 +223,47 @@ func (m *MapConfiguration) Save() {
 //Load ...
 func (m *MapConfiguration) Load() {
 
-	file, err := os.Open("Shedfile")
+	b, err := ioutil.ReadFile("Shedfile")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer file.Close()
+	fmt.Printf("Load size %d: %s", len(string(b)), string(b))
+	fmt.Println(string(b))
 
-	scanner := bufio.NewScanner(file)
-	var count int
-	for scanner.Scan() {
-		line := scanner.Text()
-		i := &item{}
-		err = json.Unmarshal([]byte(line), &i)
+	contentType := http.DetectContentType(b)
+
+	if strings.Compare("text/plain; charset=utf-8", contentType) == 0 {
+		var maps []*item
+		err = json.Unmarshal(b, &maps)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		m.maps = maps
+	} else {
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Println("Please enter unlock phrase followed by RETURN key:")
+		text, _ := reader.ReadString('\n')
+		res, err := crypto.HashPassword(text)
 		if err != nil {
 			fmt.Println(err)
 		}
-
-		m.maps = append(m.maps, i)
-		count++
+		var o [32]byte
+		copy(res[:32], o[:])
+		decrypted, worked := crypto.DecryptText(b, o)
+		if worked {
+			var maps []*item
+			err = json.Unmarshal(decrypted, &maps)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			m.maps = maps
+		} else {
+			fmt.Println("Key did not match")
+		}
 	}
 
-	if err = scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Loaded Shedfile with " + strconv.Itoa(count) + " steps")
+	fmt.Println("Loaded Shedfile with " + strconv.Itoa(len(m.maps)) + " steps")
 }

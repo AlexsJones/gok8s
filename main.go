@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/AlexsJones/shed/configuration"
+	"github.com/AlexsJones/shed/crypto"
 	"github.com/abiosoft/ishell"
 	"github.com/dimiro1/banner"
 )
@@ -106,7 +108,34 @@ func main() {
 		Help: "Saves out a new ShedFile",
 		Func: func(c *ishell.Context) {
 
-			mapConfiguration.Save()
+			if mapConfiguration.Count() == 0 {
+				fmt.Println("Nothing to save...")
+				return
+			}
+
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Println("Encrypt file [Y/N] (Default: N)")
+			text, _ := reader.ReadString('\n')
+
+			o := &configuration.SaveOptions{Encrypted: false}
+
+			if strings.Contains(text, "Y") {
+				reader = bufio.NewReader(os.Stdin)
+				fmt.Println("Please enter passphrase followed by RETURN key:")
+				text, _ = reader.ReadString('\n')
+				o.Encrypted = true
+				//Hash password for safety
+				res, err := crypto.HashPassword(text)
+				if err != nil {
+					fmt.Println(err)
+				}
+				o.Passphrase = res
+
+				mapConfiguration.Save(o)
+			} else {
+				mapConfiguration.Save(o)
+			}
+
 		},
 	})
 	shell.AddCmd(&ishell.Cmd{
