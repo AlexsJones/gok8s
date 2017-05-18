@@ -190,8 +190,6 @@ func (m *MapConfiguration) Save(options *SaveOptions) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(string(b))
-
 	var saveText string
 	if options.Encrypted {
 		var o [32]byte
@@ -212,7 +210,7 @@ func (m *MapConfiguration) Save(options *SaveOptions) {
 
 	defer f.Close()
 
-	fmt.Printf("Save size %d: %s", len(saveText), saveText)
+	fmt.Printf("Save size %d\n", len(saveText))
 	if _, err = f.WriteString(saveText); err != nil {
 		panic(err)
 	}
@@ -228,8 +226,7 @@ func (m *MapConfiguration) Load() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Printf("Load size %d: %s", len(string(b)), string(b))
-	fmt.Println(string(b))
+	fmt.Printf("Load size %d\n", len(string(b)))
 
 	contentType := http.DetectContentType(b)
 
