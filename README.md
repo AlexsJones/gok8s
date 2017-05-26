@@ -19,6 +19,8 @@ _______________/\\\________________________________/\\\__
   who you might not necessarily want to see all the steps
 
   Hooya.
+  
+  Watch an example: http://showterm.io/bf94465cc57b34a5fcf36
 
 # Install
 ```
