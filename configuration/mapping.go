@@ -148,6 +148,7 @@ func (m *MapConfiguration) Retry(i int) {
 		return
 	}
 
+	fmt.Println("Retrying now...")
 	m.run(m.maps[i])
 }
 
@@ -186,7 +187,7 @@ type SaveOptions struct {
 //Save ...
 func (m *MapConfiguration) Save(options *SaveOptions) {
 
-	b, err := json.Marshal(m.maps)
+	b, err := json.MarshalIndent(m.maps, "", "    ")
 	if err != nil {
 		fmt.Println(err)
 	}
