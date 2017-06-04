@@ -146,5 +146,6 @@ func main() {
 			mapConfiguration.Load()
 		},
 	})
-	shell.Start()
+
+	shell.Run()
 }
