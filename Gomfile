@@ -1,6 +1,0 @@
-gom 'github.com/abiosoft/ishell'
-gom 'github.com/dimiro1/banner'
-gom 'github.com/flynn-archive/go-shlex'
-gom 'github.com/mattn/go-runewidth'
-gom 'github.com/olekukonko/tablewriter'
-gom 'gopkg.in/readline.v1'
